@@ -6,7 +6,7 @@ services:
     restart: always
     container_name: file-manager-backend
     ports:
-      - "${BACK_PORT:-3001}:${BACK_PORT:-3001}"
+      - "${BACK_PORT:-8001}:${BACK_PORT:-8001}"
     volumes:
       - ./data:/app/data
       - ./uploads:/app/uploads
@@ -15,15 +15,15 @@ services:
       - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key-change-this-in-production}
       - ADMIN_PASSWORD=${ADMIN_PASSWORD}
       - DOMAIN=${DOMAIN:-localhost}
-      - BACK_PORT=${BACK_PORT:-3001}
-      - FRONT_PORT=${FRONT_PORT:-3000}
+      - BACK_PORT=${BACK_PORT:-8001}
+      - FRONT_PORT=${FRONT_PORT:-3003}
       - PROTOCOL=${PROTOCOL:-http}
       # Legacy compatibility (derived from new variables)
       - BACKEND_DOMAIN=${DOMAIN:-localhost}
       - BACKEND_PORT=${BACK_PORT:-3001}
       - BACKEND_PROTOCOL=${PROTOCOL:-http}
       - FRONTEND_DOMAIN=${DOMAIN:-localhost}
-      - FRONTEND_PORT=${FRONT_PORT:-3000}
+      - FRONTEND_PORT=${FRONT_PORT:-3003}
       - FRONTEND_PROTOCOL=${PROTOCOL:-http}
       - PRODUCTION_DOMAIN=${DOMAIN}
       - PRODUCTION_PROTOCOL=${PROTOCOL:-https}
@@ -41,19 +41,18 @@ services:
       context: .
       dockerfile: frontend/Dockerfile
       args:
-        # New simplified variables for frontend build
         - VITE_DOMAIN=${DOMAIN:-localhost}
         - VITE_PROTOCOL=${PROTOCOL:-http}
         # Legacy compatibility for existing frontend code
         - VITE_BACKEND_DOMAIN=${DOMAIN:-localhost}
-        - VITE_BACKEND_PORT=${BACK_PORT:-3001}
+        - VITE_BACKEND_PORT=${BACK_PORT:-8001}
         - VITE_BACKEND_PROTOCOL=${PROTOCOL:-http}
         - VITE_PRODUCTION_DOMAIN=${DOMAIN}
         - VITE_PRODUCTION_PROTOCOL=${PROTOCOL:-https}
     restart: always
     container_name: file-manager-frontend
     ports:
-      - "${FRONT_PORT:-3000}:3000"
+      - "${FRONT_PORT:-3003}:3003"
     depends_on:
       - backend
     networks:
@@ -63,7 +62,7 @@ services:
       - "traefik.http.routers.file-manager-frontend.rule=Host(`${DOMAIN:-localhost}`)"
       - "traefik.http.routers.file-manager-frontend.entrypoints=websecure"
       - "traefik.http.routers.file-manager-frontend.tls.certresolver=letsencrypt"
-      - "traefik.http.services.file-manager-frontend.loadbalancer.server.port=3000"
+      - "traefik.http.services.file-manager-frontend.loadbalancer.server.port=3003"
 
 volumes:
   data:
