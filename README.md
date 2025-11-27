@@ -53,11 +53,11 @@ npm run dev
 
 ```bash
 # Start with Docker Compose
-docker-compose up -d --build
+docker compose up -d --build
 
 # Check status
-docker-compose ps
-docker-compose logs -f
+docker compose ps
+docker compose logs -f
 ```
 
 **For complete production deployment with SSL:** See [DEPLOYMENT.md](DEPLOYMENT.md)
@@ -142,7 +142,7 @@ file-manager/
 │   │   ├── services/    # API clients
 │   │   └── utils/       # Utilities
 │   └── Dockerfile
-├── docker-compose.yml   # Container orchestration
+├── docker compose.yml   # Container orchestration
 ├── .env.example        # Environment template
 └── README.md
 ```
@@ -244,7 +244,7 @@ cp .env.example .env
 # Edit .env with production values
 
 # Deploy with Docker
-docker-compose up -d --build
+docker compose up -d --build
 ```
 
 ### 2. Environment Variables

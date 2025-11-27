@@ -25,9 +25,7 @@ curl -fsSL https://get.docker.com -o get-docker.sh
 sudo sh get-docker.sh
 sudo usermod -aG docker $USER
 
-# Install Docker Compose
-sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-sudo chmod +x /usr/local/bin/docker-compose
+# Docker Compose v2 is included with Docker installation
 
 # Reboot to apply permissions
 sudo reboot
@@ -55,11 +53,11 @@ ADMIN_PASSWORD=YourSecureAdminPassword123!
 **Start with Docker:**
 ```bash
 # Build and start containers
-docker-compose up -d --build
+docker compose up -d --build
 
 # Check status
-docker-compose ps
-docker-compose logs -f
+docker compose ps
+docker compose logs -f
 ```
 
 
@@ -108,13 +106,13 @@ sudo ufw status verbose
 
 ```bash
 # Check services
-docker-compose ps
+docker compose ps
 
 # Test application
 curl -I http://your-domain.com:3000
 
 # Check logs
-docker-compose logs -f
+docker compose logs -f
 ```
 
 **Access your application:**
@@ -133,9 +131,9 @@ docker-compose logs -f
 cd /path/to/files-management-app-with-api
 
 # Check Docker containers
-if ! docker-compose ps | grep -q "Up"; then
+if ! docker compose ps | grep -q "Up"; then
     echo "Docker containers stopped, restarting..."
-    docker-compose restart
+    docker compose restart
 fi
 
 ```
@@ -164,7 +162,7 @@ APP_DIR="/path/to/files-management-app-with-api"
 mkdir -p $BACKUP_DIR
 
 # Backup database
-docker-compose exec -T backend cat /app/data/database.sqlite > $BACKUP_DIR/database_$DATE.sqlite
+docker compose exec -T backend cat /app/data/database.sqlite > $BACKUP_DIR/database_$DATE.sqlite
 
 # Backup uploaded files
 tar -czf $BACKUP_DIR/uploads_$DATE.tar.gz -C $APP_DIR uploads/
@@ -199,11 +197,11 @@ cd /path/to/files-management-app-with-api
 git pull origin main
 
 # Rebuild and restart containers
-docker-compose down
-docker-compose up -d --build
+docker compose down
+docker compose up -d --build
 
 # Check status
-docker-compose ps
+docker compose ps
 ```
 
 
@@ -214,13 +212,13 @@ docker-compose ps
 **Containers won't start:**
 ```bash
 # Check logs
-docker-compose logs
+docker compose logs
 
 # Check disk space
 df -h
 
 # Check configuration
-docker-compose config
+docker compose config
 ```
 
 
@@ -231,7 +229,7 @@ htop
 docker stats
 
 # Check error logs
-docker-compose logs --tail=100
+docker compose logs --tail=100
 ```
 
 **DNS issues:**

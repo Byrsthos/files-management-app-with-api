@@ -63,7 +63,7 @@ docker-compose.yml          # Configuration Docker avec labels Traefik
 ### 1. Préparer le serveur
 
 ```bash
-# Installer Docker et Docker Compose
+# Installer Docker (inclut Docker Compose v2)
 curl -fsSL https://get.docker.com | sh
 sudo usermod -aG docker $USER
 
@@ -95,10 +95,10 @@ Après déploiement, vérifiez :
 
 ```bash
 # Status des conteneurs
-docker-compose ps
+docker compose ps
 
 # Logs des services
-docker-compose logs -f
+docker compose logs -f
 
 # Test des endpoints
 curl https://your-domain.com

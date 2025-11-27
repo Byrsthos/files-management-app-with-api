@@ -6,8 +6,9 @@ on:
   workflow_dispatch:
 
 jobs:
-  deploy:
+  test:
     runs-on: ubuntu-latest
+    name: Run Tests
     
     steps:
     - name: Checkout code
@@ -17,6 +18,7 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: 'latest'
+        cache: 'npm'
         
     - name: Install dependencies
       run: |
@@ -24,17 +26,62 @@ jobs:
         cd backend && npm install
         cd ../frontend && npm install
         
-    - name: Run tests (if any)
+    - name: Run tests
       run: |
         # Add your test commands here
         # npm test
+        # cd backend && npm test
+        # cd ../frontend && npm test
         echo "No tests configured yet"
         
-    - name: Build application
+    - name: TypeScript check
       run: |
-        cd backend && npm run build
-        cd ../frontend && npm run build
+        cd backend && npx tsc --noEmit
+        cd ../frontend && npx tsc --noEmit
+
+  build:
+    runs-on: ubuntu-latest
+    name: Build Application
+    needs: test
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 'latest'
+        cache: 'npm'
         
+    - name: Install dependencies
+      run: |
+        npm install
+        cd backend && npm install
+        cd ../frontend && npm install
+        
+    - name: Build backend
+      run: cd backend && npm run build
+      
+    - name: Build frontend
+      run: cd frontend && npm run build
+      
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-files
+        path: |
+          backend/dist/
+          frontend/dist/
+        retention-days: 1
+
+  deploy:
+    runs-on: ubuntu-latest
+    name: Deploy to Server
+    needs: [test, build]
+    environment: production
+    
+    steps:
     - name: Deploy to server
       uses: appleboy/ssh-action@v1.0.3
       with:
@@ -44,7 +91,7 @@ jobs:
         port: ${{ secrets.PORT || 22 }}
         script: |
           # Navigate to application directory
-          cd /files-management-app-with-api
+          cd files-management-app-with-api
           
           # Pull latest changes
           git pull origin main
@@ -68,21 +115,42 @@ jobs:
           cd ..
           
           # Stop containers
-          docker-compose down
+          docker compose down
           
           # Remove old images to force rebuild
           docker system prune -f
           
           # Rebuild and start containers
-          docker-compose up -d --build --force-recreate
+          docker compose up -d --build --force-recreate
           
           # Wait for services to be ready
           sleep 30
           
           # Check if containers are running
-          docker-compose ps
+          docker compose ps
           
           # Show logs for debugging
-          docker-compose logs --tail=50
+          docker compose logs --tail=50
           
           echo "Deployment completed successfully!"
+          
+  health-check:
+    runs-on: ubuntu-latest
+    name: Health Check
+    needs: deploy
+    
+    steps:
+    - name: Wait for services
+      run: sleep 60
+      
+    - name: Check application health
+      run: |
+        # Test frontend
+        echo "Testing frontend..."
+        curl -f -s --max-time 30 https://${{ secrets.DOMAIN }} || echo "Frontend check failed"
+        
+        # Test backend API
+        echo "Testing backend API..."
+        curl -f -s --max-time 30 https://${{ secrets.DOMAIN }}/api/health || echo "Backend health endpoint not available"
+        
+        echo "Health check completed"
