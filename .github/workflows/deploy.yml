@@ -44,7 +44,7 @@ jobs:
         port: ${{ secrets.PORT || 22 }}
         script: |
           # Navigate to application directory
-          cd /var/www/file-manager || cd ~/file-manager
+          cd /files-management-app-with-api
           
           # Pull latest changes
           git pull origin main
