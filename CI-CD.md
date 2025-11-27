@@ -35,6 +35,7 @@ Le docker-compose.yml inclut déjà les labels Traefik :
 
 ### Backend  
 - **URL API** : `https://api.your-domain.com` ou `https://your-domain.com/api`
+- **URL Publique** : `https://your-domain.com/public`
 - **Port interne** : 3001
 - **SSL** : Certificat automatique Let's Encrypt
 
@@ -103,6 +104,7 @@ docker compose logs -f
 # Test des endpoints
 curl https://your-domain.com
 curl https://your-domain.com/api/health
+curl https://your-domain.com/public/{file-id}
 ```
 
 ## 🚨 Troubleshooting

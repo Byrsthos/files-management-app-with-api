@@ -31,9 +31,17 @@ services:
       - traefik
     labels:
       - "traefik.enable=true"
+      # API routes
       - "traefik.http.routers.file-manager-backend.rule=Host(`api.${DOMAIN:-localhost}`) || (Host(`${DOMAIN:-localhost}`) && PathPrefix(`/api`))"
       - "traefik.http.routers.file-manager-backend.entrypoints=websecure"
       - "traefik.http.routers.file-manager-backend.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.file-manager-backend.priority=100"
+      # Public files routes
+      - "traefik.http.routers.file-manager-public.rule=Host(`${DOMAIN:-localhost}`) && PathPrefix(`/public`)"
+      - "traefik.http.routers.file-manager-public.entrypoints=websecure"
+      - "traefik.http.routers.file-manager-public.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.file-manager-public.priority=200"
+      # Service configuration
       - "traefik.http.services.file-manager-backend.loadbalancer.server.port=${BACK_PORT:-3001}"
 
   frontend:
@@ -59,9 +67,10 @@ services:
       - traefik
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.file-manager-frontend.rule=Host(`${DOMAIN:-localhost}`)"
+      - "traefik.http.routers.file-manager-frontend.rule=Host(`${DOMAIN:-localhost}`) && !PathPrefix(`/api`) && !PathPrefix(`/public`)"
       - "traefik.http.routers.file-manager-frontend.entrypoints=websecure"
       - "traefik.http.routers.file-manager-frontend.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.file-manager-frontend.priority=50"
       - "traefik.http.services.file-manager-frontend.loadbalancer.server.port=3003"
 
 volumes:
