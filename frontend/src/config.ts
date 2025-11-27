@@ -13,7 +13,7 @@ export const config = {
         
         // In development, use backend domain and port
         const backendDomain = import.meta.env.VITE_BACKEND_DOMAIN || 'localhost';
-        const backendPort = import.meta.env.VITE_BACKEND_PORT || '3001';
+        const backendPort = import.meta.env.VITE_BACKEND_PORT || '8001';
         const backendProtocol = import.meta.env.VITE_BACKEND_PROTOCOL || 'http';
         
         return `${backendProtocol}://${backendDomain}:${backendPort}/api`;

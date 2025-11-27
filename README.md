@@ -141,8 +141,7 @@ file-manager/
 │   │   ├── contexts/    # React contexts
 │   │   ├── services/    # API clients
 │   │   └── utils/       # Utilities
-│   ├── Dockerfile
-│   └── nginx.conf
+│   └── Dockerfile
 ├── docker-compose.yml   # Container orchestration
 ├── .env.example        # Environment template
 └── README.md
@@ -301,67 +300,8 @@ JWT_SECRET=your-super-secure-256-bit-secret-key-here
 ADMIN_PASSWORD=YourSecureAdminPassword123!
 ```
 
-#### Step 4: Install and Configure Nginx
-```bash
-# Install Nginx
-sudo apt install nginx -y
 
-# Remove default configuration
-sudo rm /etc/nginx/sites-enabled/default
-
-# Create File Manager configuration
-sudo nano /etc/nginx/sites-available/file-manager
-```
-
-Add this configuration:
-```nginx
-server {
-    listen 80;
-    server_name your-domain.com www.your-domain.com;
-    
-    # Simple HTTP configuration - Certbot will add HTTPS automatically
-    location / {
-        proxy_pass http://localhost:3000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    }
-    
-    location /api {
-        proxy_pass http://localhost:3001;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        client_max_body_size 1G;
-    }
-    
-    location /public {
-        proxy_pass http://localhost:3001;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        
-        # Enable caching for public files
-        proxy_cache_valid 200 1y;
-        add_header Cache-Control "public, max-age=31536000";
-    }
-}
-```
-
-#### Step 5: Enable Nginx Configuration
-```bash
-# Enable the site
-sudo ln -s /etc/nginx/sites-available/file-manager /etc/nginx/sites-enabled/
-
-# Test configuration
-sudo nginx -t
-
-# Start and enable Nginx
-sudo systemctl start nginx
-sudo systemctl enable nginx
-```
-
-#### Step 6: Domain Configuration
+#### Step 4: Domain Configuration
 ```bash
 # Configure your domain's DNS records:
 # A Record: your-domain.com → your-server-ip
@@ -371,7 +311,7 @@ sudo systemctl enable nginx
 nslookup your-domain.com
 ```
 
-#### Step 7: SSL Certificate with Certbot
+#### Step 5: SSL Certificate with Certbot
 ```bash
 # Install Certbot
 sudo apt install snapd -y
@@ -380,14 +320,14 @@ sudo snap install --classic certbot
 # Create symlink
 sudo ln -s /snap/bin/certbot /usr/bin/certbot
 
-# Obtain SSL certificate
-sudo certbot --nginx -d your-domain.com -d www.your-domain.com
+# Note: Configure your web server before running certbot
+# This example assumes you have a reverse proxy configured
 
 # Test automatic renewal
 sudo certbot renew --dry-run
 ```
 
-#### Step 8: Process Management with Systemd
+#### Step 6: Process Management with Systemd
 ```bash
 # Create systemd service
 sudo nano /etc/systemd/system/file-manager.service
@@ -426,7 +366,7 @@ ReadWritePaths=/var/www/file-manager/data /var/www/file-manager/uploads
 WantedBy=multi-user.target
 ```
 
-#### Step 9: Start Services
+#### Step 7: Start Services
 ```bash
 # Reload systemd
 sudo systemctl daemon-reload
@@ -438,32 +378,27 @@ sudo systemctl enable file-manager
 # Check status
 sudo systemctl status file-manager
 
-# Restart Nginx to apply SSL configuration
-sudo systemctl restart nginx
 ```
 
-#### Step 10: Firewall Configuration
+#### Step 8: Firewall Configuration
 ```bash
 # Configure UFW firewall
 sudo ufw allow ssh
-sudo ufw allow 'Nginx Full'
+sudo ufw allow 80/tcp
+sudo ufw allow 443/tcp
 sudo ufw --force enable
 
 # Check firewall status
 sudo ufw status
 ```
 
-#### Step 11: Monitoring and Logs
+#### Step 9: Monitoring and Logs
 ```bash
 # View application logs
 sudo journalctl -u file-manager -f
 
-# View Nginx logs
-sudo tail -f /var/log/nginx/access.log
-sudo tail -f /var/log/nginx/error.log
-
 # Check service status
-sudo systemctl status file-manager nginx
+sudo systemctl status file-manager
 ```
 
 ### 4. Production Maintenance
@@ -479,7 +414,6 @@ sudo -u www-data npm run build
 
 # Restart services
 sudo systemctl restart file-manager
-sudo systemctl reload nginx
 ```
 
 #### Backup Strategy

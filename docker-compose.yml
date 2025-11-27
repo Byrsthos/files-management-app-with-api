@@ -4,6 +4,7 @@ services:
     build:
       context: .
       dockerfile: backend/Dockerfile
+    restart: always
     container_name: file-manager-backend
     ports:
       - "${BACKEND_PORT:-3001}:${BACKEND_PORT:-3001}"
@@ -15,27 +16,28 @@ services:
       - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key-change-this-in-production}
       - ADMIN_PASSWORD=${ADMIN_PASSWORD}
       - BACKEND_DOMAIN=${BACKEND_DOMAIN:-localhost}
-      - BACKEND_PORT=${BACKEND_PORT:-3001}
+      - BACKEND_PORT=${BACKEND_PORT:-8001}
       - BACKEND_PROTOCOL=${BACKEND_PROTOCOL:-http}
       - FRONTEND_DOMAIN=${FRONTEND_DOMAIN:-localhost}
-      - FRONTEND_PORT=${FRONTEND_PORT:-3002}
+      - FRONTEND_PORT=${FRONTEND_PORT:-3003}
       - FRONTEND_PROTOCOL=${FRONTEND_PROTOCOL:-http}
       - PRODUCTION_DOMAIN=${PRODUCTION_DOMAIN}
       - PRODUCTION_PROTOCOL=${PRODUCTION_PROTOCOL:-https}
 
   frontend:
-    build: 
+    build:
       context: .
       dockerfile: frontend/Dockerfile
       args:
         - VITE_BACKEND_DOMAIN=${VITE_BACKEND_DOMAIN:-localhost}
-        - VITE_BACKEND_PORT=${VITE_BACKEND_PORT:-3001}
+        - VITE_BACKEND_PORT=${VITE_BACKEND_PORT:-8001}
         - VITE_BACKEND_PROTOCOL=${VITE_BACKEND_PROTOCOL:-http}
         - VITE_PRODUCTION_DOMAIN=${VITE_PRODUCTION_DOMAIN}
         - VITE_PRODUCTION_PROTOCOL=${VITE_PRODUCTION_PROTOCOL:-https}
+    restart: always
     container_name: file-manager-frontend
     ports:
-      - "${FRONTEND_PORT:-3002}:3002"
+      - "${FRONTEND_PORT:-3003}:3003"
     depends_on:
       - backend
 
