@@ -7,7 +7,7 @@ services:
     restart: always
     container_name: file-manager-backend
     ports:
-      - "${BACKEND_PORT:-3001}:${BACKEND_PORT:-3001}"
+      - "${BACK_PORT:-3001}:${BACK_PORT:-3001}"
     volumes:
       - ./data:/app/data
       - ./uploads:/app/uploads
@@ -15,31 +15,53 @@ services:
       - NODE_ENV=${NODE_ENV:-production}
       - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key-change-this-in-production}
       - ADMIN_PASSWORD=${ADMIN_PASSWORD}
-      - BACKEND_DOMAIN=${BACKEND_DOMAIN:-localhost}
-      - BACKEND_PORT=${BACKEND_PORT:-8001}
-      - BACKEND_PROTOCOL=${BACKEND_PROTOCOL:-http}
-      - FRONTEND_DOMAIN=${FRONTEND_DOMAIN:-localhost}
-      - FRONTEND_PORT=${FRONTEND_PORT:-3003}
-      - FRONTEND_PROTOCOL=${FRONTEND_PROTOCOL:-http}
-      - PRODUCTION_DOMAIN=${PRODUCTION_DOMAIN}
-      - PRODUCTION_PROTOCOL=${PRODUCTION_PROTOCOL:-https}
+      # New simplified variables
+      - DOMAIN=${DOMAIN:-localhost}
+      - BACK_PORT=${BACK_PORT:-3001}
+      - FRONT_PORT=${FRONT_PORT:-3000}
+      - PROTOCOL=${PROTOCOL:-http}
+      # Legacy compatibility (derived from new variables)
+      - BACKEND_DOMAIN=${DOMAIN:-localhost}
+      - BACKEND_PORT=${BACK_PORT:-3001}
+      - BACKEND_PROTOCOL=${PROTOCOL:-http}
+      - FRONTEND_DOMAIN=${DOMAIN:-localhost}
+      - FRONTEND_PORT=${FRONT_PORT:-3000}
+      - FRONTEND_PROTOCOL=${PROTOCOL:-http}
+      - PRODUCTION_DOMAIN=${DOMAIN}
+      - PRODUCTION_PROTOCOL=${PROTOCOL:-https}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.file-manager-backend.rule=Host(`api.${DOMAIN:-localhost}`) || (Host(`${DOMAIN:-localhost}`) && PathPrefix(`/api`))"
+      - "traefik.http.routers.file-manager-backend.entrypoints=websecure"
+      - "traefik.http.routers.file-manager-backend.tls.certresolver=letsencrypt"
+      - "traefik.http.services.file-manager-backend.loadbalancer.server.port=${BACK_PORT:-3001}"
 
   frontend:
     build:
       context: .
       dockerfile: frontend/Dockerfile
       args:
-        - VITE_BACKEND_DOMAIN=${VITE_BACKEND_DOMAIN:-localhost}
-        - VITE_BACKEND_PORT=${VITE_BACKEND_PORT:-8001}
-        - VITE_BACKEND_PROTOCOL=${VITE_BACKEND_PROTOCOL:-http}
-        - VITE_PRODUCTION_DOMAIN=${VITE_PRODUCTION_DOMAIN}
-        - VITE_PRODUCTION_PROTOCOL=${VITE_PRODUCTION_PROTOCOL:-https}
+        # New simplified variables for frontend build
+        - VITE_DOMAIN=${DOMAIN:-localhost}
+        - VITE_PROTOCOL=${PROTOCOL:-http}
+        # Legacy compatibility for existing frontend code
+        - VITE_BACKEND_DOMAIN=${DOMAIN:-localhost}
+        - VITE_BACKEND_PORT=${BACK_PORT:-3001}
+        - VITE_BACKEND_PROTOCOL=${PROTOCOL:-http}
+        - VITE_PRODUCTION_DOMAIN=${DOMAIN}
+        - VITE_PRODUCTION_PROTOCOL=${PROTOCOL:-https}
     restart: always
     container_name: file-manager-frontend
     ports:
-      - "${FRONTEND_PORT:-3003}:3003"
+      - "${FRONT_PORT:-3000}:3000"
     depends_on:
       - backend
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.file-manager-frontend.rule=Host(`${DOMAIN:-localhost}`)"
+      - "traefik.http.routers.file-manager-frontend.entrypoints=websecure"
+      - "traefik.http.routers.file-manager-frontend.tls.certresolver=letsencrypt"
+      - "traefik.http.services.file-manager-frontend.loadbalancer.server.port=3000"
 
 volumes:
   data:

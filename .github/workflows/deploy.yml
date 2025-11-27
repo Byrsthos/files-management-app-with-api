@@ -1,0 +1,88 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 'latest'
+        
+    - name: Install dependencies
+      run: |
+        npm install
+        cd backend && npm install
+        cd ../frontend && npm install
+        
+    - name: Run tests (if any)
+      run: |
+        # Add your test commands here
+        # npm test
+        echo "No tests configured yet"
+        
+    - name: Build application
+      run: |
+        cd backend && npm run build
+        cd ../frontend && npm run build
+        
+    - name: Deploy to server
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        port: ${{ secrets.PORT || 22 }}
+        script: |
+          # Navigate to application directory
+          cd /var/www/file-manager || cd ~/file-manager
+          
+          # Pull latest changes
+          git pull origin main
+          
+          # Create .env file from secrets
+          cat > .env << EOF
+          NODE_ENV=production
+          JWT_SECRET=${{ secrets.JWT_SECRET }}
+          ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }}
+          # Simplified variables
+          DOMAIN=${{ secrets.DOMAIN }}
+          BACK_PORT=${{ secrets.BACK_PORT || '3001' }}
+          FRONT_PORT=${{ secrets.FRONT_PORT || '3000' }}
+          PROTOCOL=${{ secrets.PROTOCOL || 'https' }}
+          EOF
+          
+          # Install dependencies
+          npm install
+          cd backend && npm install
+          cd ../frontend && npm install
+          cd ..
+          
+          # Stop containers
+          docker-compose down
+          
+          # Remove old images to force rebuild
+          docker system prune -f
+          
+          # Rebuild and start containers
+          docker-compose up -d --build --force-recreate
+          
+          # Wait for services to be ready
+          sleep 30
+          
+          # Check if containers are running
+          docker-compose ps
+          
+          # Show logs for debugging
+          docker-compose logs --tail=50
+          
+          echo "Deployment completed successfully!"
