@@ -28,5 +28,5 @@ FROM node:22-alpine
 COPY --from=build /app/dist /app/dist
 WORKDIR /app
 RUN npm install -g serve
-EXPOSE 3002
+EXPOSE 3003
 CMD ["serve", "-s", "dist", "-p", "3002"]

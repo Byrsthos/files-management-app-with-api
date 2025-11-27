@@ -13,6 +13,6 @@ RUN npm run build
 
 RUN mkdir -p data uploads
 
-EXPOSE 3001
+EXPOSE 8001
 
 CMD ["npm", "start"]
