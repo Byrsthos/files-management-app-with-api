@@ -39,14 +39,6 @@ export const config = {
     
     // Get CORS origins
     getCorsOrigins(): string[] | boolean {
-        if (this.nodeEnv === 'production') {
-            const origins = [this.getFrontendUrl()];
-            if (this.productionDomain) {
-                origins.push(`${this.productionProtocol}://${this.productionDomain}`);
-                origins.push(`${this.productionProtocol}://www.${this.productionDomain}`);
-            }
-            return origins;
-        }
-        return true; // Allow all origins in development
+        return true; // Allow all origins
     }
 };
