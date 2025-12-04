@@ -20,7 +20,7 @@ async function start() {
         origin: config.getCorsOrigins(),
         credentials: true,
         methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-        allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+        allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin', 'X-Api-Key'],
         exposedHeaders: ['Content-Range', 'X-Content-Range'],
         maxAge: 600,
         preflightContinue: false,
