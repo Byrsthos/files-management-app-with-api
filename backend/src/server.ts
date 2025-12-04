@@ -19,7 +19,12 @@ async function start() {
     await fastify.register(cors, {
         origin: config.getCorsOrigins(),
         credentials: true,
-        methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']
+        methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+        allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+        exposedHeaders: ['Content-Range', 'X-Content-Range'],
+        maxAge: 600,
+        preflightContinue: false,
+        optionsSuccessStatus: 204
     });
 
     await fastify.register(multipart, {
