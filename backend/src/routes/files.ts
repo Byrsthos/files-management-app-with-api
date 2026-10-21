@@ -282,9 +282,11 @@ export async function fileRoutes(fastify: FastifyInstance) {
 
         try {
             const fileBuffer = await fs.readFile(file.file_path);
+            const asciiName = file.current_name.replace(/[^\x20-\x7E]/g, '_').replace(/["\\]/g, '_');
+            const encodedName = encodeURIComponent(file.current_name).replace(/['()*]/g, (c: string) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`);
             reply
                 .type(file.file_type)
-                .header('Content-Disposition', `attachment; filename="${file.current_name}"`)
+                .header('Content-Disposition', `attachment; filename="${asciiName}"; filename*=UTF-8''${encodedName}`)
                 .send(fileBuffer);
         } catch (error) {
             reply.code(404).send({ error: 'File not found on disk' });
