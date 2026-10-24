@@ -27,6 +27,17 @@ async function start() {
         optionsSuccessStatus: 204
     });
 
+    fastify.addHook('onSend', async (request, reply, payload) => {
+        reply.header('X-Content-Type-Options', 'nosniff');
+        if (String(reply.getHeader('content-type') ?? '').toLowerCase().startsWith('image/svg+xml')) {
+            reply.header('Content-Security-Policy', "default-src 'none'; style-src 'unsafe-inline'; sandbox");
+            if (!reply.getHeader('content-disposition')) {
+                reply.header('Content-Disposition', 'attachment');
+            }
+        }
+        return payload;
+    });
+
     await fastify.register(multipart, {
         limits: {
             fileSize: 1024 * 1024 * 1024
