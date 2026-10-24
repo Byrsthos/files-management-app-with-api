@@ -18,7 +18,7 @@ const fastify = Fastify({
 async function start() {
     await fastify.register(cors, {
         origin: config.getCorsOrigins(),
-        credentials: true,
+        credentials: false,
         methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
         allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin', 'X-Api-Key'],
         exposedHeaders: ['Content-Range', 'X-Content-Range'],
